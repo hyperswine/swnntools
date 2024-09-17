@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 
 const Schedule = () => {
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
@@ -12,11 +12,20 @@ const Schedule = () => {
     'Science Theory', 'Science Practice'
   ]
 
-  const [schedule, setSchedule] = useState(() => {
+  const [schedule, setSchedule] = useState(
+    timeSlots.map(() => days.map(() => ''))
+  )
+  const [isDragging, setIsDragging] = useState(false)
+  const [startX, setStartX] = useState(0)
+  const [scrollLeft, setScrollLeft] = useState(0)
+  const tableRef = useRef(null)
+
+  useEffect(() => {
     const savedSchedule = localStorage.getItem('schedule')
-    return savedSchedule ? JSON.parse(savedSchedule) :
-      timeSlots.map(() => days.map(() => ''))
-  })
+    if (savedSchedule) {
+      setSchedule(JSON.parse(savedSchedule))
+    }
+  }, [])
 
   useEffect(() => {
     localStorage.setItem('schedule', JSON.stringify(schedule))
@@ -28,14 +37,39 @@ const Schedule = () => {
     setSchedule(newSchedule)
   }
 
+  const handleMouseDown = (e) => {
+    setIsDragging(true)
+    setStartX(e.pageX - tableRef.current.offsetLeft)
+    setScrollLeft(tableRef.current.scrollLeft)
+  }
+
+  const handleMouseUp = () => {
+    setIsDragging(false)
+  }
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return
+    e.preventDefault()
+    const x = e.pageX - tableRef.current.offsetLeft
+    const walk = (x - startX) * 2
+    tableRef.current.scrollLeft = scrollLeft - walk
+  }
+
   return (
     <div className="p-4">
       <h2 className="text-2xl font-bold mb-4">Interactive Adaptive Flexible Weekly Schedule</h2>
-      <div className="overflow-x-auto">
+      <div
+        className="overflow-x-auto cursor-grab"
+        ref={tableRef}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onMouseMove={handleMouseMove}
+      >
         <table className="w-full border-collapse border border-gray-300 min-w-max">
           <thead>
             <tr>
-              <th className="border border-gray-300 p-2 bg-gray-100">Time / Day</th>
+              <th className="border border-gray-300 p-2 bg-gray-100 sticky left-0 z-10">Time / Day</th>
               {days.map(day => (
                 <th key={day} className="border border-gray-300 p-2 bg-gray-100">{day}</th>
               ))}
@@ -44,7 +78,7 @@ const Schedule = () => {
           <tbody>
             {timeSlots.map((slot, slotIndex) => (
               <tr key={slot}>
-                <td className="border border-gray-300 p-2 font-bold bg-gray-100">{slot}</td>
+                <td className="border border-gray-300 p-2 font-bold bg-gray-100 sticky left-0 z-10">{slot}</td>
                 {days.map((day, dayIndex) => (
                   <td key={`${day}-${slot}`} className="border border-gray-300 p-2">
                     <input
