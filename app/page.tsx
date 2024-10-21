@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { FaTasks, FaCalendarAlt, FaRandom } from "react-icons/fa"
+import { FaTasks, FaCalendarAlt, FaRandom, FaChartBar } from "react-icons/fa" // Importing a new icon
 
 export default function Page() {
   return (
@@ -22,6 +22,12 @@ export default function Page() {
           <div className="bg-white shadow-lg rounded-lg p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
             <FaRandom className="text-red-500 text-2xl" />
             <span className="text-xl text-red-500">Check out RandStuff here</span>
+          </div>
+        </Link>
+        <Link href="data-view"> {/* New entry */}
+          <div className="bg-white shadow-lg rounded-lg p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
+            <FaChartBar className="text-red-500 text-2xl" /> {/* New icon */}
+            <span className="text-xl text-red-500">Check out DataView here</span>
           </div>
         </Link>
       </div>
