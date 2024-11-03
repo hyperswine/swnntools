@@ -8,14 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 const DataViewer = ({ data }) => {
   const [expandedCells, setExpandedCells] = useState({})
 
-  const toggleCell = (rowIndex, colName) => {
+  const toggleCell = (rowIndex: any, colName: string) => {
     setExpandedCells(prev => ({
       ...prev,
       [`${rowIndex}-${colName}`]: !prev[`${rowIndex}-${colName}`]
     }))
   }
 
-  const truncate = (str, n) => {
+  const truncate = (str: string, n: number) => {
     if (typeof str !== 'string') str = JSON.stringify(str)
     return (str.length > n) ? str.substr(0, n - 1) + '...' : str
   }
@@ -36,7 +36,7 @@ const DataViewer = ({ data }) => {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {data.map((row, rowIndex) => (
+        {data.map((row: { [x: string]: any }, rowIndex: React.Key) => (
           <TableRow key={rowIndex}>
             {columns.map((key) => {
               const cellKey = `${rowIndex}-${key}`

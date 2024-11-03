@@ -30,14 +30,16 @@ const PomodoroTimer = () => {
     let duration
     switch (timerMode) {
       case 'default':
-        duration = Math.random() < 0.5 ? 15 * 60 : 30 * 60
+        // duration = Math.random() < 0.5 ? 15 * 60 : 30 * 60
+        duration = getRandomTime(25, 40)
         break
       case 'green':
-        duration = getRandomTime(30, 45)
+        duration = getRandomTime(50, 90)
         break
       case 'red':
         duration = getRandomTime(15, 25)
         break
+      // should never happen
       default:
         duration = 25 * 60
     }
