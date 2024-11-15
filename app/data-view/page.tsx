@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 const DataViewer = ({ data }) => {
   const [expandedCells, setExpandedCells] = useState({})
 
-  const toggleCell = (rowIndex: any, colName: string) => {
+  const toggleCell = (rowIndex, colName: string) => {
     setExpandedCells(prev => ({
       ...prev,
       [`${rowIndex}-${colName}`]: !prev[`${rowIndex}-${colName}`]
