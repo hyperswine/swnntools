@@ -95,13 +95,15 @@ const Schedule = () => {
           </tbody>
         </table>
       </div>
-      <div className="mt-4">
-        <h3 className="text-lg font-bold">Adaptive Notes:</h3>
-        <ul className="list-disc pl-5">
-          <li>Feeling stressed? Rotate to the next activity sooner</li>
-          <li>Feeling focused? Keep going with the activity until you are satisfied</li>
-          <li>Feeling obsessed without progress? Consider switching to a different activity</li>
-          <li>Energy low? Choose a less demanding activity or take a short break</li>
+      <div className="mt-4 p-4 bg-gray-50 rounded-lg shadow-md">
+        <h3 className="text-lg font-bold mb-2">Adaptive Notes:</h3>
+        <ul className="list-disc pl-5 space-y-1">
+          <li>Feeling stressed? Rotate to the next activity sooner.</li>
+          <li>Feeling focused? Keep going with the activity until you are satisfied.</li>
+          <li>Feeling obsessed without progress? Consider switching to a different activity.</li>
+          <li>Energy low? Choose a less demanding activity or take a short break.</li>
+          <li>Feel the tension, the power, the world against you, everyone against you</li>
+          <li>Feel everyone laughing at you</li>
         </ul>
       </div>
     </div>
