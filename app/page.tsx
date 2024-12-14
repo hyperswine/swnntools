@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { FaTasks, FaCalendarAlt, FaRandom, FaChartBar, FaPalette, FaBook, FaPaintBrush, FaMusic, FaCode, FaCogs, FaBrain } from "react-icons/fa" // Importing new icons
+import { FaTasks, FaCalendarAlt, FaRandom, FaChartBar, FaPalette, FaBook, FaPaintBrush, FaMusic, FaCode, FaCogs, FaBrain, FaProjectDiagram } from "react-icons/fa" // Importing new icons
 
 export default function Page() {
   return (
@@ -54,22 +54,28 @@ export default function Page() {
             <span className="text-xl text-red-500">Check out Piano Practice</span>
           </div>
         </Link>
-        <Link href="program-metrics"> {/* New entry */}
+        <Link href="program-metrics">
           <div className="bg-white shadow-lg rounded-lg p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
-            <FaCode className="text-red-500 text-2xl" /> {/* New icon */}
+            <FaCode className="text-red-500 text-2xl" />
             <span className="text-xl text-red-500">Check out Program Metrics</span>
           </div>
         </Link>
-        <Link href="program-design-complexity"> {/* New entry */}
+        <Link href="program-design-complexity">
           <div className="bg-white shadow-lg rounded-lg p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
-            <FaCogs className="text-red-500 text-2xl" /> {/* New icon */}
+            <FaCogs className="text-red-500 text-2xl" />
             <span className="text-xl text-red-500">Check out Program Design Complexity</span>
           </div>
         </Link>
-        <Link href="systematic-program-solving"> {/* New entry */}
-          <div className="bg-white shadow-lg rounded-lg p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
-            <FaBrain className="text-red-500 text-2xl" /> {/* New icon */}
+        <Link href="systematic-program-solving">
+          <div className="bg-white shadow-lg rounded-l˝g p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
+            <FaBrain className="text-red-500 text-2xl" />
             <span className="text-xl text-red-500">Check out Systematic Program Solving</span>
+          </div>
+        </Link>
+        <Link href="adaptive-programming"> {/* New entry */}
+          <div className="bg-white shadow-lg rounded-lg p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
+            <FaProjectDiagram className="text-red-500 text-2xl" /> {/* New icon */}
+            <span className="text-xl text-red-500">Check out Adaptive Programming</span>
           </div>
         </Link>
       </div>
