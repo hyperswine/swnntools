@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { ChevronDown, ChevronRight, BookOpen, Code, GitBranch, Box, Layers, Bug } from 'lucide-react'
+import { ChevronDown, ChevronRight, BookOpen, Code, GitBranch, Box, Layers, Bug, Brain, GitMerge, Layout, Binary } from 'lucide-react'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 const ProblemSolvingGuide = () => {
   const [expandedSection, setExpandedSection] = useState('parse')
@@ -160,6 +161,14 @@ const ProblemSolvingGuide = () => {
     }
   ]
 
+  const CognitiveMetrics = [
+    { name: 'Functions', limit: 7, current: 5 },
+    { name: 'Parameters', limit: 7, current: 4 },
+    { name: 'Fields', limit: 7, current: 6 },
+    { name: 'Operations', limit: 7, current: 5 },
+    { name: 'Relationships', limit: 7, current: 4 }
+  ]
+
   return (
     <div className="w-full max-w-4xl mx-auto p-6 space-y-4">
       <h1 className="text-3xl font-bold mb-6">Systematic Problem-Solving Guide</h1>
@@ -202,6 +211,177 @@ const ProblemSolvingGuide = () => {
           </Card>
         ))}
       </div>
+
+      {/* Cognitive Limits Section */}
+      <section className="mb-8">
+        <Card className="p-6">
+          <div className="flex items-center mb-4">
+            <Brain className="w-6 h-6 mr-2" />
+            <h2 className="text-2xl font-semibold">Cognitive Limits (7±2)</h2>
+          </div>
+          <div className="h-64 mb-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={CognitiveMetrics}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis domain={[0, 8]} />
+                <Tooltip />
+                <Bar dataKey="limit" fill="#94a3b8" name="Maximum Limit" />
+                <Bar dataKey="current" fill="#3b82f6" name="Recommended" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+      </section>
+
+      {/* Binary/Ternary Choices */}
+      <section className="mb-8">
+        <Card className="p-6">
+          <div className="flex items-center mb-4">
+            <Binary className="w-6 h-6 mr-2" />
+            <h2 className="text-2xl font-semibold">Binary/Ternary Choices</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 border rounded">
+              <h3 className="font-semibold mb-2">Layout Options</h3>
+              <ul className="list-disc pl-4">
+                <li>List View</li>
+                <li>Grid View</li>
+                <li className="text-gray-500">(Optional) Carousel</li>
+              </ul>
+            </div>
+            <div className="p-4 border rounded">
+              <h3 className="font-semibold mb-2">Edit Modes</h3>
+              <ul className="list-disc pl-4">
+                <li>Inline Editing</li>
+                <li>Modal Dialog</li>
+                <li className="text-gray-500">(Optional) Dedicated Page</li>
+              </ul>
+            </div>
+            <div className="p-4 border rounded">
+              <h3 className="font-semibold mb-2">Data Display</h3>
+              <ul className="list-disc pl-4">
+                <li>Cards</li>
+                <li>Table Rows</li>
+                <li className="text-gray-500">(Optional) Timeline</li>
+              </ul>
+            </div>
+          </div>
+        </Card>
+      </section>
+
+      {/* Composition Guidelines */}
+      <section className="mb-8">
+        <Card className="p-6">
+          <div className="flex items-center mb-4">
+            <GitMerge className="w-6 h-6 mr-2" />
+            <h2 className="text-2xl font-semibold">Composition Guidelines</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="border p-4 rounded">
+              <h3 className="font-semibold mb-2">Function Composition</h3>
+              <pre className="bg-gray-100 p-3 rounded text-sm">
+                {`// Good: Limited composition
+const result = process(
+  validate(
+    normalize(
+      filterData(input)
+    )
+  )
+);`}
+              </pre>
+            </div>
+            <div className="border p-4 rounded">
+              <h3 className="font-semibold mb-2">Component Composition</h3>
+              <pre className="bg-gray-100 p-3 rounded text-sm">
+                {`<Page>
+  <Header />
+  <MainContent>
+    <Sidebar />
+    <DataDisplay />
+  </MainContent>
+  <Footer />
+</Page>`}
+              </pre>
+            </div>
+          </div>
+        </Card>
+      </section>
+
+      {/* Implementation Guidelines */}
+      <section className="mb-8">
+        <Card className="p-6">
+          <div className="flex items-center mb-4">
+            <Code className="w-6 h-6 mr-2" />
+            <h2 className="text-2xl font-semibold">Implementation Guidelines</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h3 className="font-semibold mb-2">Simple Data Class Pattern</h3>
+              <pre className="bg-gray-100 p-3 rounded text-sm">
+                {`interface UserData {
+  id: string;      // 1
+  name: string;    // 2
+  email: string;   // 3
+  role: string;    // 4
+  status: string;  // 5
+}`}
+              </pre>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-2">View Composition Pattern</h3>
+              <pre className="bg-gray-100 p-3 rounded text-sm">
+                {`const DataView = ({ data, viewType }) => {
+  switch(viewType) {
+    case 'list':
+      return <ListView data={data} />;
+    case 'grid':
+      return <GridView data={data} />;
+    default:
+      return <DefaultView data={data} />;
+  }
+};`}
+              </pre>
+            </div>
+          </div>
+        </Card>
+      </section>
+
+      {/* Layout Patterns */}
+      <section>
+        <Card className="p-6">
+          <div className="flex items-center mb-4">
+            <Layout className="w-6 h-6 mr-2" />
+            <h2 className="text-2xl font-semibold">Layout Patterns</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="border p-4 rounded">
+              <h3 className="font-semibold mb-2">List View</h3>
+              <div className="space-y-2">
+                <div className="h-8 bg-blue-100 rounded"></div>
+                <div className="h-8 bg-blue-100 rounded"></div>
+                <div className="h-8 bg-blue-100 rounded"></div>
+              </div>
+            </div>
+            <div className="border p-4 rounded">
+              <h3 className="font-semibold mb-2">Grid View</h3>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="h-8 bg-blue-100 rounded"></div>
+                <div className="h-8 bg-blue-100 rounded"></div>
+                <div className="h-8 bg-blue-100 rounded"></div>
+                <div className="h-8 bg-blue-100 rounded"></div>
+              </div>
+            </div>
+            <div className="border p-4 rounded">
+              <h3 className="font-semibold mb-2">Carousel</h3>
+              <div className="relative h-16">
+                <div className="absolute inset-0 bg-blue-100 rounded"></div>
+                <div className="absolute inset-y-0 -right-2 w-8 bg-blue-50 rounded-r opacity-50"></div>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </section>
     </div>
   )
 }
