@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { FaTasks, FaCalendarAlt, FaRandom, FaChartBar, FaPalette, FaBook, FaPaintBrush, FaMusic } from "react-icons/fa" // Importing new icons
+import { FaTasks, FaCalendarAlt, FaRandom, FaChartBar, FaPalette, FaBook, FaPaintBrush, FaMusic, FaCode, FaCogs, FaBrain } from "react-icons/fa" // Importing new icons
 
 export default function Page() {
   return (
@@ -36,22 +36,40 @@ export default function Page() {
             <span className="text-xl text-red-500">Check out UICooser here</span>
           </div>
         </Link>
-        <Link href="exemplardocumentationstyle"> {/* New entry */}
+        <Link href="exemplardocumentationstyle">
           <div className="bg-white shadow-lg rounded-lg p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
-            <FaBook className="text-red-500 text-2xl" /> {/* New icon */}
+            <FaBook className="text-red-500 text-2xl" />
             <span className="text-xl text-red-500">Exemplar Documentation</span>
           </div>
         </Link>
-        <Link href="painting-practice"> {/* New entry */}
+        <Link href="painting-practice">
           <div className="bg-white shadow-lg rounded-lg p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
-            <FaPaintBrush className="text-red-500 text-2xl" /> {/* New icon */}
+            <FaPaintBrush className="text-red-500 text-2xl" />
             <span className="text-xl text-red-500">Check out Painting Practice</span>
           </div>
         </Link>
-        <Link href="piano-practice"> {/* New entry */}
+        <Link href="piano-practice">
           <div className="bg-white shadow-lg rounded-lg p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
-            <FaMusic className="text-red-500 text-2xl" /> {/* New icon */}
+            <FaMusic className="text-red-500 text-2xl" />
             <span className="text-xl text-red-500">Check out Piano Practice</span>
+          </div>
+        </Link>
+        <Link href="program-metrics"> {/* New entry */}
+          <div className="bg-white shadow-lg rounded-lg p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
+            <FaCode className="text-red-500 text-2xl" /> {/* New icon */}
+            <span className="text-xl text-red-500">Check out Program Metrics</span>
+          </div>
+        </Link>
+        <Link href="program-design-complexity"> {/* New entry */}
+          <div className="bg-white shadow-lg rounded-lg p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
+            <FaCogs className="text-red-500 text-2xl" /> {/* New icon */}
+            <span className="text-xl text-red-500">Check out Program Design Complexity</span>
+          </div>
+        </Link>
+        <Link href="systematic-program-solving"> {/* New entry */}
+          <div className="bg-white shadow-lg rounded-lg p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
+            <FaBrain className="text-red-500 text-2xl" /> {/* New icon */}
+            <span className="text-xl text-red-500">Check out Systematic Program Solving</span>
           </div>
         </Link>
       </div>
