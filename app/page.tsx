@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { FaTasks, FaCalendarAlt, FaRandom, FaChartBar, FaPalette, FaBook, FaPaintBrush, FaMusic, FaCode, FaCogs, FaBrain, FaProjectDiagram } from "react-icons/fa" // Importing new icons
+import { FaTasks, FaCalendarAlt, FaRandom, FaChartBar, FaPalette, FaBook, FaPaintBrush, FaMusic, FaCode, FaCogs, FaBrain, FaProjectDiagram, FaGuitar } from "react-icons/fa" // Importing new icons
 
 export default function Page() {
   return (
@@ -9,31 +9,31 @@ export default function Page() {
         <Link href="taskswitcher2">
           <div className="bg-white shadow-lg rounded-lg p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
             <FaTasks className="text-red-500 text-2xl" />
-            <span className="text-xl text-red-500">Check out TaskSwitcher here</span>
+            <span className="text-xl text-red-500">TaskSwitcher</span>
           </div>
         </Link>
         <Link href="timetable">
           <div className="bg-white shadow-lg rounded-lg p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
             <FaCalendarAlt className="text-red-500 text-2xl" />
-            <span className="text-xl text-red-500">Check out Timetable here</span>
+            <span className="text-xl text-red-500">Timetable</span>
           </div>
         </Link>
         <Link href="randstuff">
           <div className="bg-white shadow-lg rounded-lg p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
             <FaRandom className="text-red-500 text-2xl" />
-            <span className="text-xl text-red-500">Check out RandStuff here</span>
+            <span className="text-xl text-red-500">RandStuff</span>
           </div>
         </Link>
         <Link href="data-view">
           <div className="bg-white shadow-lg rounded-lg p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
             <FaChartBar className="text-red-500 text-2xl" />
-            <span className="text-xl text-red-500">Check out DataView here</span>
+            <span className="text-xl text-red-500">DataView</span>
           </div>
         </Link>
         <Link href="ui-chooser">
           <div className="bg-white shadow-lg rounded-lg p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
             <FaPalette className="text-red-500 text-2xl" />
-            <span className="text-xl text-red-500">Check out UICooser here</span>
+            <span className="text-xl text-red-500">UICooser</span>
           </div>
         </Link>
         <Link href="exemplardocumentationstyle">
@@ -45,37 +45,43 @@ export default function Page() {
         <Link href="painting-practice">
           <div className="bg-white shadow-lg rounded-lg p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
             <FaPaintBrush className="text-red-500 text-2xl" />
-            <span className="text-xl text-red-500">Check out Painting Practice</span>
+            <span className="text-xl text-red-500">Painting Practice</span>
           </div>
         </Link>
         <Link href="piano-practice">
           <div className="bg-white shadow-lg rounded-lg p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
             <FaMusic className="text-red-500 text-2xl" />
-            <span className="text-xl text-red-500">Check out Piano Practice</span>
+            <span className="text-xl text-red-500">Piano Practice</span>
           </div>
         </Link>
         <Link href="program-metrics">
           <div className="bg-white shadow-lg rounded-lg p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
             <FaCode className="text-red-500 text-2xl" />
-            <span className="text-xl text-red-500">Check out Program Metrics</span>
+            <span className="text-xl text-red-500">Program Metrics</span>
           </div>
         </Link>
         <Link href="program-design-complexity">
           <div className="bg-white shadow-lg rounded-lg p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
             <FaCogs className="text-red-500 text-2xl" />
-            <span className="text-xl text-red-500">Check out Program Design Complexity</span>
+            <span className="text-xl text-red-500">Program Design Complexity</span>
           </div>
         </Link>
         <Link href="systematic-program-solving">
           <div className="bg-white shadow-lg rounded-l˝g p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
             <FaBrain className="text-red-500 text-2xl" />
-            <span className="text-xl text-red-500">Check out Systematic Program Solving</span>
+            <span className="text-xl text-red-500">Systematic Program Solving</span>
           </div>
         </Link>
-        <Link href="adaptive-programming"> {/* New entry */}
+        <Link href="adaptive-programming">
           <div className="bg-white shadow-lg rounded-lg p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
-            <FaProjectDiagram className="text-red-500 text-2xl" /> {/* New icon */}
-            <span className="text-xl text-red-500">Check out Adaptive Programming</span>
+            <FaProjectDiagram className="text-red-500 text-2xl" />
+            <span className="text-xl text-red-500">Adaptive Programming</span>
+          </div>
+        </Link>
+        <Link href="ukulele-practice"> {/* New entry */}
+          <div className="bg-white shadow-lg rounded-lg p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
+            <FaGuitar className="text-red-500 text-2xl" /> {/* New icon */}
+            <span className="text-xl text-red-500">Ukulele Practice</span>
           </div>
         </Link>
       </div>
