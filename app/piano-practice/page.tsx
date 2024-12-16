@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { FaMusic, FaDrum, FaClock } from 'react-icons/fa' // Importing new icons
+import { FaMusic, FaDrum, FaClock, FaGuitar } from 'react-icons/fa' // Importing new icons
 
 const PianoExercises = () => {
   const fingerExercises = [
@@ -89,6 +89,39 @@ const PianoExercises = () => {
     }
   ]
 
+  const chordExercises = [
+    {
+      title: "C - G - Am - F (I-V-vi-IV)",
+      description: "This is incredibly common in pop music.",
+      tips: ["Practice smooth transitions", "Use a metronome", "Experiment with different rhythms"]
+    },
+    {
+      title: "C - Am - F - G (I-vi-IV-V)",
+      description: "Another popular progression with a slightly different feel.",
+      tips: ["Focus on even timing", "Try different inversions", "Play along with recordings"]
+    },
+    {
+      title: "C - F - G - C (I-IV-V-I)",
+      description: "A classic and simple progression.",
+      tips: ["Keep a steady tempo", "Practice hands separately", "Use different dynamics"]
+    },
+    {
+      title: "C - G7 - C (I-V7-I)",
+      description: "The addition of the 7th chord adds a bit of color.",
+      tips: ["Emphasize the 7th note", "Experiment with voicings", "Play with different rhythms"]
+    },
+    {
+      title: "Setting a Tempo",
+      description: "Use a metronome to set and maintain a consistent tempo.",
+      tips: ["Start slow", "Gradually increase speed", "Stay relaxed"]
+    },
+    {
+      title: "Changing the Key",
+      description: "Practice playing progressions in different keys.",
+      tips: ["Use a key chart", "Transpose familiar songs", "Practice scales in new keys"]
+    }
+  ]
+
   const ExerciseCard = ({ exercise }) => (
     <Card className="mb-4">
       <CardHeader>
@@ -118,7 +151,7 @@ const PianoExercises = () => {
       <h1 className="text-3xl font-bold mb-6">Mini MIDI Keyboard Exercises</h1>
 
       <Tabs defaultValue="finger" className="mb-6">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="finger" className="flex items-center gap-2">
             <FaMusic className="w-4 h-4" /> {/* Replacing PianoKey with FaMusic */}
             Finger Dexterity
@@ -126,6 +159,10 @@ const PianoExercises = () => {
           <TabsTrigger value="rhythm" className="flex items-center gap-2">
             <FaDrum className="w-4 h-4" /> {/* Replacing MusicNote with FaDrum */}
             Rhythm
+          </TabsTrigger>
+          <TabsTrigger value="chords" className="flex items-center gap-2">
+            <FaGuitar className="w-4 h-4" /> {/* New icon */}
+            Chords
           </TabsTrigger>
         </TabsList>
 
@@ -144,21 +181,28 @@ const PianoExercises = () => {
             ))}
           </div>
         </TabsContent>
+
+        <TabsContent value="chords" className="mt-4">
+          <div className="space-y-4">
+            {chordExercises.map((exercise, index) => (
+              <ExerciseCard key={index} exercise={exercise} />
+            ))}
+          </div>
+        </TabsContent>
       </Tabs>
 
       <Card className="bg-blue-50">
         <CardContent className="pt-6">
           <div className="flex items-start gap-4">
             <FaClock className="w-6 h-6 text-blue-600" /> {/* Replacing Timer with FaClock */}
-            <div>
-              <h3 className="font-semibold mb-2">Practice Tips</h3>
-              <ul className="list-disc pl-6 space-y-2">
-                <li>Start slowly and gradually increase speed as you become comfortable</li>
-                <li>Always use a metronome to maintain steady timing</li>
-                <li>Practice each hand separately before combining them</li>
-                <li>Focus on maintaining evenness and clarity in your playing</li>
-              </ul>
-            </div>
+            <div></div>
+            <h3 className="font-semibold mb-2">Practice Tips</h3>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>Start slowly and gradually increase speed as you become comfortable</li>
+              <li>Always use a metronome to maintain steady timing</li>
+              <li>Practice each hand separately before combining them</li>
+              <li>Focus on maintaining evenness and clarity in your playing</li>
+            </ul>
           </div>
         </CardContent>
       </Card>
