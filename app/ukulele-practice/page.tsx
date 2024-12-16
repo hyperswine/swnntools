@@ -139,6 +139,56 @@ const PracticeRoutine = () => (
         </div>
       </div>
     </div>
+
+    <div className="bg-white p-6 rounded-lg shadow-sm">
+      <h3 className="text-lg font-semibold mb-4">Chord Progressions</h3>
+      <div className="space-y-4">
+        <div className="border-l-4 border-blue-500 pl-4">
+          <h4 className="font-medium">C - G - Am - F (I-V-vi-IV)</h4>
+          <p className="text-gray-600">This is incredibly common in pop music.</p>
+        </div>
+        <div className="border-l-4 border-green-500 pl-4">
+          <h4 className="font-medium">C - Am - F - G (I-vi-IV-V)</h4>
+          <p className="text-gray-600">Another popular progression with a slightly different feel.</p>
+        </div>
+        <div className="border-l-4 border-purple-500 pl-4">
+          <h4 className="font-medium">G - D - Em - C (I-V-vi-IV)</h4>
+          <p className="text-gray-600">A common progression in many genres.</p>
+        </div>
+        <div className="border-l-4 border-yellow-500 pl-4">
+          <h4 className="font-medium">C - G7 - C (I-V7-I)</h4>
+          <p className="text-gray-600">The addition of the 7th chord adds a bit of color.</p>
+        </div>
+      </div>
+    </div>
+
+    <div className="bg-white p-6 rounded-lg shadow-sm">
+      <h3 className="text-lg font-semibold mb-4">Strumming Patterns</h3>
+      <div className="space-y-4">
+        <div className="border-l-4 border-blue-500 pl-4">
+          <h4 className="font-medium">Down-Up-Down-Up</h4>
+          <p className="text-gray-600">This is a versatile pattern that works well for many songs.</p>
+        </div>
+        <div className="border-l-4 border-green-500 pl-4">
+          <h4 className="font-medium">Down-Down-Up-Up-Down</h4>
+          <p className="text-gray-600">This pattern adds a bit more rhythmic interest.</p>
+        </div>
+      </div>
+    </div>
+
+    <div className="bg-white p-6 rounded-lg shadow-sm">
+      <h3 className="text-lg font-semibold mb-4">Changing the Key and Tempo</h3>
+      <div className="space-y-4">
+        <div className="border-l-4 border-blue-500 pl-4">
+          <h4 className="font-medium">Changing the Key</h4>
+          <p className="text-gray-600">Practice playing progressions in different keys. Use a key chart, transpose familiar songs, and practice scales in new keys.</p>
+        </div>
+        <div className="border-l-4 border-green-500 pl-4">
+          <h4 className="font-medium">Setting a Tempo</h4>
+          <p className="text-gray-600">Use a metronome to set and maintain a consistent tempo. Start slow, gradually increase speed, and stay relaxed.</p>
+        </div>
+      </div>
+    </div>
   </div>
 )
 
