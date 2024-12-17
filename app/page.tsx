@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { FaTasks, FaCalendarAlt, FaRandom, FaChartBar, FaPalette, FaBook, FaPaintBrush, FaMusic, FaCode, FaCogs, FaBrain, FaProjectDiagram, FaGuitar, FaClipboardList } from "react-icons/fa" // Importing new icons
+import { FaTasks, FaCalendarAlt, FaRandom, FaChartBar, FaPalette, FaBook, FaPaintBrush, FaMusic, FaCode, FaCogs, FaBrain, FaProjectDiagram, FaGuitar, FaClipboardList, FaCubes } from "react-icons/fa" // Added FaCubes
 
 export default function Page() {
   return (
@@ -84,10 +84,16 @@ export default function Page() {
             <span className="text-xl text-red-500">Ukulele Practice</span>
           </div>
         </Link>
-        <Link href="daily-checklist"> {/* New entry */}
+        <Link href="daily-checklist">
           <div className="bg-white shadow-lg rounded-lg p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
-            <FaClipboardList className="text-red-500 text-2xl" /> {/* New icon */}
+            <FaClipboardList className="text-red-500 text-2xl" />
             <span className="text-xl text-red-500">Daily Checklist</span>
+          </div>
+        </Link>
+        <Link href="lego">
+          <div className="bg-white shadow-lg rounded-lg p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
+            <FaCubes className="text-red-500 text-2xl" />
+            <span className="text-xl text-red-500">Lego Templates</span>
           </div>
         </Link>
       </div>
