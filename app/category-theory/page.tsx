@@ -1,7 +1,21 @@
 'use client'
 
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { Plus, X, ArrowRight, Eye, Edit3, Download, Upload, Trash2 } from 'lucide-react'
+import ReactFlow, {
+  Node,
+  Edge,
+  addEdge,
+  Background,
+  Controls,
+  MiniMap,
+  useNodesState,
+  useEdgesState,
+  Connection,
+  Position,
+  MarkerType,
+} from 'reactflow'
+import 'reactflow/dist/style.css'
 import {
   saveCategory,
   saveFunctor,
@@ -275,162 +289,150 @@ const CategoryVisualizer = () => {
   }
 
   const CategoryDiagram = ({ category }: { category: Category | null }) => {
-    if (!category) return null
+    const [nodes, setNodes, onNodesChange] = useNodesState([])
+    const [edges, setEdges, onEdgesChange] = useEdgesState([])
 
-    // Responsive dimensions
-    const svgWidth = 400
-    const svgHeight = 300
-    const centerX = svgWidth / 2
-    const centerY = svgHeight / 2
-    const radius = 80
-
-    // Position objects in a circle
-    const objectPositions = {}
-    category.objects.forEach((obj, i) => {
-      const angle = (i * 2 * Math.PI) / category.objects.length
-      objectPositions[obj] = {
-        x: centerX + radius * Math.cos(angle),
-        y: centerY + radius * Math.sin(angle)
+    // Convert category data to React Flow nodes and edges
+    useEffect(() => {
+      if (!category) {
+        setNodes([])
+        setEdges([])
+        return
       }
-    })
+
+      // Create nodes for objects
+      const initialNodes: Node[] = category.objects.map((obj, index) => {
+        // Position objects in a circle for initial layout
+        const angle = (index * 2 * Math.PI) / category.objects.length
+        const radius = Math.max(100, category.objects.length * 20)
+        const x = 200 + radius * Math.cos(angle)
+        const y = 200 + radius * Math.sin(angle)
+
+        return {
+          id: obj,
+          type: 'default',
+          position: { x, y },
+          data: {
+            label: (
+              <div className="text-center font-semibold text-sm px-2 py-1">
+                {obj}
+              </div>
+            )
+          },
+          style: {
+            background: '#fbbf24',
+            border: '2px solid #d97706',
+            borderRadius: '50%',
+            width: 60,
+            height: 60,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '14px',
+            fontWeight: 'bold',
+          },
+          sourcePosition: Position.Right,
+          targetPosition: Position.Left,
+        }
+      })
+
+      // Create edges for morphisms
+      const initialEdges: Edge[] = category.morphisms.map((morphism) => {
+        const isSelfLoop = morphism.from === morphism.to
+
+        return {
+          id: morphism.id,
+          source: morphism.from,
+          target: morphism.to,
+          type: isSelfLoop ? 'smoothstep' : 'smoothstep',
+          animated: false,
+          style: {
+            stroke: '#3b82f6',
+            strokeWidth: 2,
+          },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color: '#3b82f6',
+          },
+          label: morphism.name,
+          labelStyle: {
+            fontSize: '12px',
+            fontWeight: 'bold',
+            fill: '#1e40af',
+          },
+          labelBgStyle: {
+            fill: 'white',
+            fillOpacity: 0.8,
+          },
+          // For self-loops, add some curvature
+          ...(isSelfLoop && {
+            style: {
+              stroke: '#3b82f6',
+              strokeWidth: 2,
+            },
+            sourceHandle: 'top',
+            targetHandle: 'bottom',
+          }),
+        }
+      })
+
+      setNodes(initialNodes)
+      setEdges(initialEdges)
+    }, [category, setNodes, setEdges])
+
+    const onConnect = useCallback((params: Connection) => {
+      setEdges((eds) => addEdge(params, eds))
+    }, [setEdges])
+
+    if (!category) {
+      return (
+        <div className="border rounded-lg p-4 bg-gray-50 h-96">
+          <div className="flex items-center justify-center h-full text-gray-500">
+            Select a category to view its diagram
+          </div>
+        </div>
+      )
+    }
 
     return (
       <div className="border rounded-lg p-4 bg-white">
-        <h3 className="text-lg font-semibold mb-2">{category.name}</h3>
-        <div className="w-full overflow-x-auto">
-          <svg
-            width={svgWidth}
-            height={svgHeight}
-            className="border mx-auto min-w-[300px]"
-            viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-            preserveAspectRatio="xMidYMid meet"
+        <h3 className="text-lg font-semibold mb-4">{category.name}</h3>
+        <div className="h-96 w-full border rounded">
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            fitView
+            fitViewOptions={{
+              padding: 0.2,
+              includeHiddenNodes: false,
+            }}
+            nodesDraggable={true}
+            nodesConnectable={false}
+            elementsSelectable={true}
+            selectNodesOnDrag={false}
+            panOnDrag={true}
+            zoomOnScroll={true}
+            zoomOnPinch={true}
+            panOnScrollMode={undefined}
+            className="bg-gray-50"
           >
-            {/* Render morphisms as arrows */}
-            {category.morphisms.map(morphism => {
-            const fromPos = objectPositions[morphism.from]
-            const toPos = objectPositions[morphism.to]
-            if (!fromPos || !toPos) return null
-
-            const dx = toPos.x - fromPos.x
-            const dy = toPos.y - fromPos.y
-            const length = Math.sqrt(dx * dx + dy * dy)
-            const unitX = dx / length
-            const unitY = dy / length
-
-            // Adjust start and end points to not overlap with circles
-            const startX = fromPos.x + unitX * 20
-            const startY = fromPos.y + unitY * 20
-            const endX = toPos.x - unitX * 20
-            const endY = toPos.y - unitY * 20
-
-            // Self-loops
-            if (morphism.from === morphism.to) {
-              const loopRadius = 25
-              const cx = fromPos.x + loopRadius
-              const cy = fromPos.y - loopRadius
-
-              return (
-                <g key={morphism.id}>
-                  <circle
-                    cx={cx}
-                    cy={cy}
-                    r={loopRadius}
-                    fill="none"
-                    stroke="#3b82f6"
-                    strokeWidth="2"
-                  />
-                  <polygon
-                    points={`${cx + loopRadius - 5},${cy} ${cx + loopRadius + 5},${cy - 5} ${cx + loopRadius + 5},${cy + 5}`}
-                    fill="#3b82f6"
-                  />
-                  <text
-                    x={cx}
-                    y={cy - loopRadius - 15}
-                    textAnchor="middle"
-                    className="text-sm font-medium"
-                    fill="#1e40af"
-                  >
-                    {morphism.name}
-                  </text>
-                </g>
-              )
-            }
-
-            // Calculate angle for label rotation
-            const angle = Math.atan2(dy, dx) * 180 / Math.PI
-
-            // Calculate label position offset from the arrow
-            const labelOffsetDistance = 15
-            const labelX = (startX + endX) / 2 - unitY * labelOffsetDistance
-            const labelY = (startY + endY) / 2 + unitX * labelOffsetDistance
-
-            // Adjust angle to keep text readable (avoid upside-down text)
-            const adjustedAngle = angle > 90 || angle < -90 ? angle + 180 : angle
-
-            return (
-              <g key={morphism.id}>
-                <line
-                  x1={startX}
-                  y1={startY}
-                  x2={endX}
-                  y2={endY}
-                  stroke="#3b82f6"
-                  strokeWidth="2"
-                  markerEnd="url(#arrowhead)"
-                />
-                <text
-                  x={labelX}
-                  y={labelY}
-                  textAnchor="middle"
-                  className="text-sm font-medium"
-                  transform={`rotate(${adjustedAngle}, ${labelX}, ${labelY})`}
-                  fill="#1e40af"
-                >
-                  {morphism.name}
-                </text>
-              </g>
-            )
-          })}
-
-          {/* Render objects as circles */}
-          {category.objects.map(obj => {
-            const pos = objectPositions[obj]
-            return (
-              <g key={obj}>
-                <circle
-                  cx={pos.x}
-                  cy={pos.y}
-                  r="20"
-                  fill="#fbbf24"
-                  stroke="#d97706"
-                  strokeWidth="2"
-                />
-                <text
-                  x={pos.x}
-                  y={pos.y + 5}
-                  textAnchor="middle"
-                  className="text-sm font-semibold"
-                >
-                  {obj}
-                </text>
-              </g>
-            )
-          })}
-
-          {/* Arrow marker definition */}
-          <defs>
-            <marker
-              id="arrowhead"
-              markerWidth="10"
-              markerHeight="7"
-              refX="9"
-              refY="3.5"
-              orient="auto"
-            >
-              <polygon points="0 0, 10 3.5, 0 7" fill="#3b82f6" />
-            </marker>
-          </defs>
-        </svg>
+            <Background color="#e5e7eb" gap={20} />
+            <Controls />
+            <MiniMap
+              nodeColor="#fbbf24"
+              nodeStrokeColor="#d97706"
+              nodeStrokeWidth={2}
+              zoomable
+              pannable
+              className="bg-white border"
+            />
+          </ReactFlow>
+        </div>
+        <div className="mt-2 text-sm text-gray-600">
+          💡 Drag objects to rearrange the diagram. Use mouse wheel to zoom and drag to pan.
         </div>
       </div>
     )
