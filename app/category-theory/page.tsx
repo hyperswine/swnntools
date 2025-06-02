@@ -284,12 +284,29 @@ const CategoryVisualizer = () => {
                     points={`${cx + loopRadius - 5},${cy} ${cx + loopRadius + 5},${cy - 5} ${cx + loopRadius + 5},${cy + 5}`}
                     fill="#3b82f6"
                   />
-                  <text x={cx} y={cy - loopRadius - 10} textAnchor="middle" className="text-sm font-medium">
+                  <text
+                    x={cx}
+                    y={cy - loopRadius - 15}
+                    textAnchor="middle"
+                    className="text-sm font-medium"
+                    fill="#1e40af"
+                  >
                     {morphism.name}
                   </text>
                 </g>
               )
             }
+
+            // Calculate angle for label rotation
+            const angle = Math.atan2(dy, dx) * 180 / Math.PI
+
+            // Calculate label position offset from the arrow
+            const labelOffsetDistance = 15
+            const labelX = (startX + endX) / 2 - unitY * labelOffsetDistance
+            const labelY = (startY + endY) / 2 + unitX * labelOffsetDistance
+
+            // Adjust angle to keep text readable (avoid upside-down text)
+            const adjustedAngle = angle > 90 || angle < -90 ? angle + 180 : angle
 
             return (
               <g key={morphism.id}>
@@ -303,10 +320,12 @@ const CategoryVisualizer = () => {
                   markerEnd="url(#arrowhead)"
                 />
                 <text
-                  x={(startX + endX) / 2}
-                  y={(startY + endY) / 2 - 10}
+                  x={labelX}
+                  y={labelY}
                   textAnchor="middle"
                   className="text-sm font-medium"
+                  transform={`rotate(${adjustedAngle}, ${labelX}, ${labelY})`}
+                  fill="#1e40af"
                 >
                   {morphism.name}
                 </text>
