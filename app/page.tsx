@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { FaTasks, FaCalendarAlt, FaRandom, FaChartBar, FaPalette, FaBook, FaPaintBrush, FaMusic, FaCode, FaCogs, FaBrain, FaProjectDiagram, FaGuitar, FaClipboardList, FaCubes } from "react-icons/fa" // Added FaCubes
+import { FaTasks, FaCalendarAlt, FaRandom, FaChartBar, FaPalette, FaBook, FaPaintBrush, FaMusic, FaCode, FaCogs, FaBrain, FaProjectDiagram, FaGuitar, FaClipboardList, FaCubes, FaSitemap } from "react-icons/fa"
 
 export default function Page() {
   return (
@@ -67,7 +67,7 @@ export default function Page() {
           </div>
         </Link>
         <Link href="systematic-program-solving">
-          <div className="bg-white shadow-lg rounded-l˝g p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
+          <div className="bg-white shadow-lg rounded-lg p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
             <FaBrain className="text-red-500 text-2xl" />
             <span className="text-xl text-red-500">Systematic Program Solving</span>
           </div>
@@ -94,6 +94,12 @@ export default function Page() {
           <div className="bg-white shadow-lg rounded-lg p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
             <FaCubes className="text-red-500 text-2xl" />
             <span className="text-xl text-red-500">Lego Templates</span>
+          </div>
+        </Link>
+        <Link href="category-theory">
+          <div className="bg-white shadow-lg rounded-lg p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
+            <FaSitemap className="text-red-500 text-2xl" />
+            <span className="text-xl text-red-500">Category Theory</span>
           </div>
         </Link>
       </div>
