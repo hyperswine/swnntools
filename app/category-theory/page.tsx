@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
-import { Plus, X, ArrowRight, Eye, Edit3, Save, Download, Upload, Trash2 } from 'lucide-react'
+import { Plus, X, ArrowRight, Eye, Edit3, Download, Upload, Trash2 } from 'lucide-react'
 import {
   saveCategory,
   saveFunctor,
@@ -71,7 +71,8 @@ const CategoryVisualizer = () => {
 
   const [selectedCategory, setSelectedCategory] = useState('set')
   const [selectedFunctor, setSelectedFunctor] = useState('forgetful')
-  const [editMode, setEditMode] = useState(null)
+  const [editMode, setEditMode] = useState<'category' | 'functor' | null>(null)
+  const [editingItem, setEditingItem] = useState<string | null>(null)
   const [newCategory, setNewCategory] = useState({ name: '', objects: '', morphisms: '' })
   const [newFunctor, setNewFunctor] = useState({ name: '', source: '', target: '', objectMap: '', morphismMap: '' })
   const [loading, setLoading] = useState(false)
@@ -100,43 +101,73 @@ const CategoryVisualizer = () => {
     loadData()
   }, [])
 
-  // Save data to Firebase
-  const handleSaveData = async () => {
-    try {
-      setSaveStatus('saving')
-      await saveAllData(categories, functors)
-      setSaveStatus('saved')
+  // Show save status temporarily
+  const showSaveStatus = (status: 'saved' | 'saving' | 'error') => {
+    setSaveStatus(status)
+    if (status !== 'saving') {
       setTimeout(() => setSaveStatus(null), 2000)
-    } catch (error) {
-      console.error('Error saving data:', error)
-      setSaveStatus('error')
-      setTimeout(() => setSaveStatus(null), 3000)
     }
   }
 
   // Delete category with persistence
   const handleDeleteCategory = async (categoryId: string) => {
     try {
+      showSaveStatus('saving')
       await deleteCategory(categoryId)
       setCategories(categories.filter(cat => cat.id !== categoryId))
       if (selectedCategory === categoryId) {
         setSelectedCategory(categories.find(cat => cat.id !== categoryId)?.id || '')
       }
+      showSaveStatus('saved')
     } catch (error) {
       console.error('Error deleting category:', error)
+      showSaveStatus('error')
     }
   }
 
   // Delete functor with persistence
   const handleDeleteFunctor = async (functorId: string) => {
     try {
+      showSaveStatus('saving')
       await deleteFunctor(functorId)
       setFunctors(functors.filter(f => f.id !== functorId))
       if (selectedFunctor === functorId) {
         setSelectedFunctor(functors.find(f => f.id !== functorId)?.id || '')
       }
+      showSaveStatus('saved')
     } catch (error) {
       console.error('Error deleting functor:', error)
+      showSaveStatus('error')
+    }
+  }
+
+  // Edit category
+  const handleEditCategory = (categoryId: string) => {
+    const category = categories.find(cat => cat.id === categoryId)
+    if (category) {
+      setNewCategory({
+        name: category.name,
+        objects: category.objects.join(', '),
+        morphisms: category.morphisms.map(m => `${m.name}: ${m.from}->${m.to}`).join(', ')
+      })
+      setEditingItem(categoryId)
+      setEditMode('category')
+    }
+  }
+
+  // Edit functor
+  const handleEditFunctor = (functorId: string) => {
+    const functor = functors.find(f => f.id === functorId)
+    if (functor) {
+      setNewFunctor({
+        name: functor.name,
+        source: functor.source,
+        target: functor.target,
+        objectMap: Object.entries(functor.objectMap).map(([k, v]) => `${k}->${v}`).join(', '),
+        morphismMap: Object.entries(functor.morphismMap).map(([k, v]) => `${k}->${v}`).join(', ')
+      })
+      setEditingItem(functorId)
+      setEditMode('functor')
     }
   }
 
@@ -154,25 +185,38 @@ const CategoryVisualizer = () => {
       return null
     }).filter(Boolean) as Morphism[]
 
-    const category: Category = {
-      id: Date.now().toString(),
-      name: newCategory.name,
-      objects,
-      morphisms
-    }
-
     try {
-      setSaveStatus('saving')
-      await saveCategory(category)
-      setCategories([...categories, category])
+      showSaveStatus('saving')
+
+      if (editingItem) {
+        // Update existing category
+        const updatedCategory: Category = {
+          id: editingItem,
+          name: newCategory.name,
+          objects,
+          morphisms
+        }
+        await saveCategory(updatedCategory)
+        setCategories(categories.map(cat => cat.id === editingItem ? updatedCategory : cat))
+      } else {
+        // Add new category
+        const category: Category = {
+          id: Date.now().toString(),
+          name: newCategory.name,
+          objects,
+          morphisms
+        }
+        await saveCategory(category)
+        setCategories([...categories, category])
+      }
+
       setNewCategory({ name: '', objects: '', morphisms: '' })
       setEditMode(null)
-      setSaveStatus('saved')
-      setTimeout(() => setSaveStatus(null), 2000)
+      setEditingItem(null)
+      showSaveStatus('saved')
     } catch (error) {
       console.error('Error saving category:', error)
-      setSaveStatus('error')
-      setTimeout(() => setSaveStatus(null), 3000)
+      showSaveStatus('error')
     }
   }
 
@@ -191,27 +235,42 @@ const CategoryVisualizer = () => {
       if (from && to) morphismMap[from] = to
     })
 
-    const functor: Functor = {
-      id: Date.now().toString(),
-      name: newFunctor.name,
-      source: newFunctor.source,
-      target: newFunctor.target,
-      objectMap,
-      morphismMap
-    }
-
     try {
-      setSaveStatus('saving')
-      await saveFunctor(functor)
-      setFunctors([...functors, functor])
+      showSaveStatus('saving')
+
+      if (editingItem) {
+        // Update existing functor
+        const updatedFunctor: Functor = {
+          id: editingItem,
+          name: newFunctor.name,
+          source: newFunctor.source,
+          target: newFunctor.target,
+          objectMap,
+          morphismMap
+        }
+        await saveFunctor(updatedFunctor)
+        setFunctors(functors.map(f => f.id === editingItem ? updatedFunctor : f))
+      } else {
+        // Add new functor
+        const functor: Functor = {
+          id: Date.now().toString(),
+          name: newFunctor.name,
+          source: newFunctor.source,
+          target: newFunctor.target,
+          objectMap,
+          morphismMap
+        }
+        await saveFunctor(functor)
+        setFunctors([...functors, functor])
+      }
+
       setNewFunctor({ name: '', source: '', target: '', objectMap: '', morphismMap: '' })
       setEditMode(null)
-      setSaveStatus('saved')
-      setTimeout(() => setSaveStatus(null), 2000)
+      setEditingItem(null)
+      showSaveStatus('saved')
     } catch (error) {
       console.error('Error saving functor:', error)
-      setSaveStatus('error')
-      setTimeout(() => setSaveStatus(null), 3000)
+      showSaveStatus('error')
     }
   }
 
@@ -440,19 +499,11 @@ const CategoryVisualizer = () => {
     <div className="p-4 md:p-6 max-w-7xl mx-auto bg-gray-50 min-h-screen">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8 space-y-4 lg:space-y-0">
         <h1 className="text-2xl md:text-3xl font-bold text-center lg:text-left flex-1">Category Theory Visualizer</h1>
-        <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
+        <div className="flex items-center space-x-4">
           {loading && <span className="text-gray-600">Loading...</span>}
           {saveStatus === 'saving' && <span className="text-blue-600">Saving...</span>}
           {saveStatus === 'saved' && <span className="text-green-600">Saved!</span>}
           {saveStatus === 'error' && <span className="text-red-600">Save failed</span>}
-          <button
-            onClick={handleSaveData}
-            disabled={saveStatus === 'saving'}
-            className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:opacity-50"
-          >
-            <Save size={20} />
-            <span>Save All</span>
-          </button>
         </div>
       </div>
 
@@ -461,7 +512,11 @@ const CategoryVisualizer = () => {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-semibold">Categories</h2>
           <button
-            onClick={() => setEditMode('category')}
+            onClick={() => {
+              setEditingItem(null)
+              setNewCategory({ name: '', objects: '', morphisms: '' })
+              setEditMode('category')
+            }}
             className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
             <Plus size={20} />
@@ -487,8 +542,16 @@ const CategoryVisualizer = () => {
                     <button
                       onClick={() => setSelectedCategory(category.id)}
                       className={`p-2 rounded ${selectedCategory === category.id ? 'bg-blue-600 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
+                      title="View category"
                     >
                       <Eye size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleEditCategory(category.id)}
+                      className="p-2 rounded bg-yellow-200 hover:bg-yellow-300 text-yellow-600"
+                      title="Edit category"
+                    >
+                      <Edit3 size={16} />
                     </button>
                     <button
                       onClick={() => handleDeleteCategory(category.id)}
@@ -519,7 +582,11 @@ const CategoryVisualizer = () => {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-semibold">Functors</h2>
           <button
-            onClick={() => setEditMode('functor')}
+            onClick={() => {
+              setEditingItem(null)
+              setNewFunctor({ name: '', source: '', target: '', objectMap: '', morphismMap: '' })
+              setEditMode('functor')
+            }}
             className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
           >
             <Plus size={20} />
@@ -545,8 +612,16 @@ const CategoryVisualizer = () => {
                     <button
                       onClick={() => setSelectedFunctor(functor.id)}
                       className={`p-2 rounded ${selectedFunctor === functor.id ? 'bg-green-600 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
+                      title="View functor"
                     >
                       <Eye size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleEditFunctor(functor.id)}
+                      className="p-2 rounded bg-yellow-200 hover:bg-yellow-300 text-yellow-600"
+                      title="Edit functor"
+                    >
+                      <Edit3 size={16} />
                     </button>
                     <button
                       onClick={() => handleDeleteFunctor(functor.id)}
@@ -571,13 +646,17 @@ const CategoryVisualizer = () => {
         )}
       </div>
 
-      {/* Add Category Modal */}
+      {/* Add/Edit Category Modal */}
       {editMode === 'category' && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg max-w-md w-full">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Add Category</h3>
-              <button onClick={() => setEditMode(null)}>
+              <h3 className="text-lg font-semibold">{editingItem ? 'Edit Category' : 'Add Category'}</h3>
+              <button onClick={() => {
+                setEditMode(null)
+                setEditingItem(null)
+                setNewCategory({ name: '', objects: '', morphisms: '' })
+              }}>
                 <X size={20} />
               </button>
             </div>
@@ -607,20 +686,24 @@ const CategoryVisualizer = () => {
                 onClick={addCategory}
                 className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
               >
-                Add Category
+                {editingItem ? 'Update Category' : 'Add Category'}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Add Functor Modal */}
+      {/* Add/Edit Functor Modal */}
       {editMode === 'functor' && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg max-w-md w-full">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Add Functor</h3>
-              <button onClick={() => setEditMode(null)}>
+              <h3 className="text-lg font-semibold">{editingItem ? 'Edit Functor' : 'Add Functor'}</h3>
+              <button onClick={() => {
+                setEditMode(null)
+                setEditingItem(null)
+                setNewFunctor({ name: '', source: '', target: '', objectMap: '', morphismMap: '' })
+              }}>
                 <X size={20} />
               </button>
             </div>
@@ -670,7 +753,7 @@ const CategoryVisualizer = () => {
                 onClick={addFunctor}
                 className="w-full py-2 bg-green-600 text-white rounded hover:bg-green-700"
               >
-                Add Functor
+                {editingItem ? 'Update Functor' : 'Add Functor'}
               </button>
             </div>
           </div>
