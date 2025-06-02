@@ -218,6 +218,7 @@ const CategoryVisualizer = () => {
   const CategoryDiagram = ({ category }: { category: Category | null }) => {
     if (!category) return null
 
+    // Responsive dimensions
     const svgWidth = 400
     const svgHeight = 300
     const centerX = svgWidth / 2
@@ -237,9 +238,16 @@ const CategoryVisualizer = () => {
     return (
       <div className="border rounded-lg p-4 bg-white">
         <h3 className="text-lg font-semibold mb-2">{category.name}</h3>
-        <svg width={svgWidth} height={svgHeight} className="border">
-          {/* Render morphisms as arrows */}
-          {category.morphisms.map(morphism => {
+        <div className="w-full overflow-x-auto">
+          <svg
+            width={svgWidth}
+            height={svgHeight}
+            className="border mx-auto min-w-[300px]"
+            viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+            preserveAspectRatio="xMidYMid meet"
+          >
+            {/* Render morphisms as arrows */}
+            {category.morphisms.map(morphism => {
             const fromPos = objectPositions[morphism.from]
             const toPos = objectPositions[morphism.to]
             if (!fromPos || !toPos) return null
@@ -345,6 +353,7 @@ const CategoryVisualizer = () => {
             </marker>
           </defs>
         </svg>
+        </div>
       </div>
     )
   }
@@ -360,7 +369,9 @@ const CategoryVisualizer = () => {
     return (
       <div className="border rounded-lg p-4 bg-white">
         <h3 className="text-lg font-semibold mb-4">{functor.name}</h3>
-        <div className="flex items-center space-x-8">
+
+        {/* Desktop layout: horizontal */}
+        <div className="hidden lg:flex items-center space-x-8">
           <div className="flex-1">
             <h4 className="text-md font-medium mb-2">Source: {sourceCategory.name}</h4>
             <CategoryDiagram category={sourceCategory} />
@@ -372,6 +383,24 @@ const CategoryVisualizer = () => {
           </div>
 
           <div className="flex-1">
+            <h4 className="text-md font-medium mb-2">Target: {targetCategory.name}</h4>
+            <CategoryDiagram category={targetCategory} />
+          </div>
+        </div>
+
+        {/* Mobile/Tablet layout: vertical */}
+        <div className="lg:hidden space-y-6">
+          <div>
+            <h4 className="text-md font-medium mb-2">Source: {sourceCategory.name}</h4>
+            <CategoryDiagram category={sourceCategory} />
+          </div>
+
+          <div className="flex items-center justify-center space-x-2">
+            <ArrowRight size={24} className="text-green-600" />
+            <span className="text-sm font-medium text-green-600">F</span>
+          </div>
+
+          <div>
             <h4 className="text-md font-medium mb-2">Target: {targetCategory.name}</h4>
             <CategoryDiagram category={targetCategory} />
           </div>
@@ -389,10 +418,10 @@ const CategoryVisualizer = () => {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto bg-gray-50 min-h-screen">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-center flex-1">Category Theory Visualizer</h1>
-        <div className="flex items-center space-x-4">
+    <div className="p-4 md:p-6 max-w-7xl mx-auto bg-gray-50 min-h-screen">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8 space-y-4 lg:space-y-0">
+        <h1 className="text-2xl md:text-3xl font-bold text-center lg:text-left flex-1">Category Theory Visualizer</h1>
+        <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
           {loading && <span className="text-gray-600">Loading...</span>}
           {saveStatus === 'saving' && <span className="text-blue-600">Saving...</span>}
           {saveStatus === 'saved' && <span className="text-green-600">Saved!</span>}
