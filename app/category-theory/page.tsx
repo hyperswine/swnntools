@@ -1,7 +1,17 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
-import { Plus, X, ArrowRight, Eye, Edit3 } from 'lucide-react'
+import { Plus, X, ArrowRight, Eye, Edit3, Save, Download, Upload, Trash2 } from 'lucide-react'
+import {
+  saveCategory,
+  saveFunctor,
+  getAllCategories,
+  getAllFunctors,
+  deleteCategory,
+  deleteFunctor,
+  loadAllData,
+  saveAllData
+} from '../../lib/categoryPersistence'
 
 interface Morphism {
   id: string
@@ -64,8 +74,73 @@ const CategoryVisualizer = () => {
   const [editMode, setEditMode] = useState(null)
   const [newCategory, setNewCategory] = useState({ name: '', objects: '', morphisms: '' })
   const [newFunctor, setNewFunctor] = useState({ name: '', source: '', target: '', objectMap: '', morphismMap: '' })
+  const [loading, setLoading] = useState(false)
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error' | null>(null)
 
-  const addCategory = () => {
+  // Load data from Firebase on component mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true)
+        const { categories: loadedCategories, functors: loadedFunctors } = await loadAllData()
+
+        if (loadedCategories.length > 0) {
+          setCategories(loadedCategories)
+        }
+        if (loadedFunctors.length > 0) {
+          setFunctors(loadedFunctors)
+        }
+      } catch (error) {
+        console.error('Error loading data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadData()
+  }, [])
+
+  // Save data to Firebase
+  const handleSaveData = async () => {
+    try {
+      setSaveStatus('saving')
+      await saveAllData(categories, functors)
+      setSaveStatus('saved')
+      setTimeout(() => setSaveStatus(null), 2000)
+    } catch (error) {
+      console.error('Error saving data:', error)
+      setSaveStatus('error')
+      setTimeout(() => setSaveStatus(null), 3000)
+    }
+  }
+
+  // Delete category with persistence
+  const handleDeleteCategory = async (categoryId: string) => {
+    try {
+      await deleteCategory(categoryId)
+      setCategories(categories.filter(cat => cat.id !== categoryId))
+      if (selectedCategory === categoryId) {
+        setSelectedCategory(categories.find(cat => cat.id !== categoryId)?.id || '')
+      }
+    } catch (error) {
+      console.error('Error deleting category:', error)
+    }
+  }
+
+  // Delete functor with persistence
+  const handleDeleteFunctor = async (functorId: string) => {
+    try {
+      await deleteFunctor(functorId)
+      setFunctors(functors.filter(f => f.id !== functorId))
+      if (selectedFunctor === functorId) {
+        setSelectedFunctor(functors.find(f => f.id !== functorId)?.id || '')
+      }
+    } catch (error) {
+      console.error('Error deleting functor:', error)
+    }
+  }
+
+  const addCategory = async () => {
     if (!newCategory.name) return
 
     const objects = newCategory.objects.split(',').map(s => s.trim()).filter(Boolean)
@@ -86,12 +161,22 @@ const CategoryVisualizer = () => {
       morphisms
     }
 
-    setCategories([...categories, category])
-    setNewCategory({ name: '', objects: '', morphisms: '' })
-    setEditMode(null)
+    try {
+      setSaveStatus('saving')
+      await saveCategory(category)
+      setCategories([...categories, category])
+      setNewCategory({ name: '', objects: '', morphisms: '' })
+      setEditMode(null)
+      setSaveStatus('saved')
+      setTimeout(() => setSaveStatus(null), 2000)
+    } catch (error) {
+      console.error('Error saving category:', error)
+      setSaveStatus('error')
+      setTimeout(() => setSaveStatus(null), 3000)
+    }
   }
 
-  const addFunctor = () => {
+  const addFunctor = async () => {
     if (!newFunctor.name || !newFunctor.source || !newFunctor.target) return
 
     const objectMap: Record<string, string> = {}
@@ -115,9 +200,19 @@ const CategoryVisualizer = () => {
       morphismMap
     }
 
-    setFunctors([...functors, functor])
-    setNewFunctor({ name: '', source: '', target: '', objectMap: '', morphismMap: '' })
-    setEditMode(null)
+    try {
+      setSaveStatus('saving')
+      await saveFunctor(functor)
+      setFunctors([...functors, functor])
+      setNewFunctor({ name: '', source: '', target: '', objectMap: '', morphismMap: '' })
+      setEditMode(null)
+      setSaveStatus('saved')
+      setTimeout(() => setSaveStatus(null), 2000)
+    } catch (error) {
+      console.error('Error saving functor:', error)
+      setSaveStatus('error')
+      setTimeout(() => setSaveStatus(null), 3000)
+    }
   }
 
   const CategoryDiagram = ({ category }: { category: Category | null }) => {
@@ -295,7 +390,23 @@ const CategoryVisualizer = () => {
 
   return (
     <div className="p-6 max-w-7xl mx-auto bg-gray-50 min-h-screen">
-      <h1 className="text-3xl font-bold mb-8 text-center">Category Theory Visualizer</h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-3xl font-bold text-center flex-1">Category Theory Visualizer</h1>
+        <div className="flex items-center space-x-4">
+          {loading && <span className="text-gray-600">Loading...</span>}
+          {saveStatus === 'saving' && <span className="text-blue-600">Saving...</span>}
+          {saveStatus === 'saved' && <span className="text-green-600">Saved!</span>}
+          {saveStatus === 'error' && <span className="text-red-600">Save failed</span>}
+          <button
+            onClick={handleSaveData}
+            disabled={saveStatus === 'saving'}
+            className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:opacity-50"
+          >
+            <Save size={20} />
+            <span>Save All</span>
+          </button>
+        </div>
+      </div>
 
       {/* Categories Section */}
       <div className="mb-8">
@@ -311,23 +422,42 @@ const CategoryVisualizer = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-          {categories.map(category => (
-            <div key={category.id} className="border rounded-lg p-4 bg-white">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-lg font-semibold">{category.name}</h3>
-                <button
-                  onClick={() => setSelectedCategory(category.id)}
-                  className={`p-2 rounded ${selectedCategory === category.id ? 'bg-blue-600 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
-                >
-                  <Eye size={16} />
-                </button>
-              </div>
-              <div className="text-sm text-gray-600">
-                <div>Objects: {category.objects.join(', ')}</div>
-                <div>Morphisms: {category.morphisms.map(m => m.name).join(', ')}</div>
-              </div>
+          {loading ? (
+            <div className="col-span-full text-center py-8 text-gray-600">
+              Loading categories...
             </div>
-          ))}
+          ) : categories.length === 0 ? (
+            <div className="col-span-full text-center py-8 text-gray-600">
+              No categories yet. Click "Add Category" to create your first category.
+            </div>
+          ) : (
+            categories.map(category => (
+              <div key={category.id} className="border rounded-lg p-4 bg-white">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-semibold">{category.name}</h3>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => setSelectedCategory(category.id)}
+                      className={`p-2 rounded ${selectedCategory === category.id ? 'bg-blue-600 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
+                    >
+                      <Eye size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteCategory(category.id)}
+                      className="p-2 rounded bg-red-200 hover:bg-red-300 text-red-600"
+                      title="Delete category"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </div>
+                <div className="text-sm text-gray-600">
+                  <div>Objects: {category.objects.join(', ')}</div>
+                  <div>Morphisms: {category.morphisms.map(m => m.name).join(', ')}</div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
         {/* Category Diagram Display */}
@@ -350,22 +480,41 @@ const CategoryVisualizer = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-4 mb-6">
-          {functors.map(functor => (
-            <div key={functor.id} className="border rounded-lg p-4 bg-white">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-lg font-semibold">{functor.name}</h3>
-                <button
-                  onClick={() => setSelectedFunctor(functor.id)}
-                  className={`p-2 rounded ${selectedFunctor === functor.id ? 'bg-green-600 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
-                >
-                  <Eye size={16} />
-                </button>
-              </div>
-              <div className="text-sm text-gray-600">
-                {categories.find(cat => cat.id === functor.source)?.name} → {categories.find(cat => cat.id === functor.target)?.name}
-              </div>
+          {loading ? (
+            <div className="text-center py-8 text-gray-600">
+              Loading functors...
             </div>
-          ))}
+          ) : functors.length === 0 ? (
+            <div className="text-center py-8 text-gray-600">
+              No functors yet. Click "Add Functor" to create your first functor.
+            </div>
+          ) : (
+            functors.map(functor => (
+              <div key={functor.id} className="border rounded-lg p-4 bg-white">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-semibold">{functor.name}</h3>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => setSelectedFunctor(functor.id)}
+                      className={`p-2 rounded ${selectedFunctor === functor.id ? 'bg-green-600 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
+                    >
+                      <Eye size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteFunctor(functor.id)}
+                      className="p-2 rounded bg-red-200 hover:bg-red-300 text-red-600"
+                      title="Delete functor"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </div>
+                <div className="text-sm text-gray-600">
+                  {categories.find(cat => cat.id === functor.source)?.name} → {categories.find(cat => cat.id === functor.target)?.name}
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
         {/* Functor Diagram Display */}
