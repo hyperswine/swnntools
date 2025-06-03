@@ -38,8 +38,9 @@ interface FunctionDefinition {
 
 // Simple parser for functional pseudo code
 class FunctionalParser {
-  private tokens: string[] = [];
-  private position = 0; parse(code: string): FunctionDefinition[] {
+  private tokens: string[] = []
+  private position = 0
+  parse(code: string): FunctionDefinition[] {
     // Split into lines and process each line as a function definition
     const lines = code.split('\n').map(line => line.trim()).filter(line => line.length > 0)
     const definitions: FunctionDefinition[] = []
@@ -146,26 +147,49 @@ class FunctionalParser {
   private parseTerm(): Term | null {
     if (this.position >= this.tokens.length) return null
 
-    const token = this.tokens[this.position++]
+    return this.parseApplication()
+  }
 
-    // Check for function application with parentheses
-    if (this.position < this.tokens.length && this.tokens[this.position] === '(') {
-      this.position++ // consume '('
-      const args: Term[] = []
+  private parseApplication(): Term | null {
+    let left = this.parseAtom()
+    if (!left) return null
 
-      while (this.position < this.tokens.length && this.tokens[this.position] !== ')') {
-        const arg = this.parseTerm()
-        if (arg) args.push(arg)
-      }
+    // Parse arguments for function application
+    const args: Term[] = []
 
-      if (this.position < this.tokens.length) this.position++ // consume ')'
+    while (this.position < this.tokens.length && this.tokens[this.position] !== ')') {
+      const arg = this.parseAtom()
+      if (!arg) break
+      args.push(arg)
+    }
 
+    if (args.length > 0) {
       return {
         type: 'application',
-        function: { type: 'variable', name: token },
+        function: left,
         arguments: args
       }
     }
+
+    return left
+  }
+
+  private parseAtom(): Term | null {
+    if (this.position >= this.tokens.length) return null
+
+    const token = this.tokens[this.position]
+
+    // Handle parenthesized expressions
+    if (token === '(') {
+      this.position++ // consume '('
+      const term = this.parseApplication()
+      if (this.position < this.tokens.length && this.tokens[this.position] === ')') {
+        this.position++ // consume ')'
+      }
+      return term
+    }
+
+    this.position++
 
     // Check if it's a number
     if (!isNaN(Number(token))) {
@@ -175,23 +199,7 @@ class FunctionalParser {
       }
     }
 
-    // Check for function application without parentheses (curried style)
-    // Collect all remaining tokens as arguments until end of line
-    const args: Term[] = []
-    while (this.position < this.tokens.length) {
-      const arg = this.parseTerm()
-      if (arg) args.push(arg)
-    }
-
-    if (args.length > 0) {
-      return {
-        type: 'application',
-        function: { type: 'variable', name: token },
-        arguments: args
-      }
-    }
-
-    // Simple variable or function reference
+    // Variable or function name
     return {
       type: 'variable',
       name: token
