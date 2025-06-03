@@ -254,7 +254,7 @@ class FlowChartGenerator {
 
       // Pattern node
       const patternLabel = def.patterns.length > 0
-        ? def.patterns.map(p => this.formatPattern(p)).join(' ')
+        ? def.patterns.map(p => this.formatPattern(p)).join(', ')
         : 'default'
 
       this.nodes.push({
@@ -336,8 +336,8 @@ class FlowChartGenerator {
 
   private formatPattern(pattern: Pattern): string {
     if (pattern.args && pattern.args.length > 0) {
-      const args = pattern.args.map(arg => this.formatPattern(arg)).join(' ')
-      return `${pattern.name} ${args}`
+      const args = pattern.args.map(arg => this.formatPattern(arg)).join(', ')
+      return `${pattern.name}(${args})`
     }
     return pattern.name
   }

@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { FaTasks, FaCalendarAlt, FaRandom, FaChartBar, FaPalette, FaBook, FaPaintBrush, FaMusic, FaCode, FaCogs, FaBrain, FaProjectDiagram, FaGuitar, FaClipboardList, FaCubes, FaSitemap } from "react-icons/fa"
+import { FaTasks, FaCalendarAlt, FaRandom, FaChartBar, FaPalette, FaBook, FaPaintBrush, FaMusic, FaCode, FaCogs, FaBrain, FaProjectDiagram, FaGuitar, FaClipboardList, FaCubes, FaSitemap, FaShareAlt } from "react-icons/fa"
 
 export default function Page() {
   return (
@@ -100,6 +100,12 @@ export default function Page() {
           <div className="bg-white shadow-lg rounded-lg p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
             <FaSitemap className="text-red-500 text-2xl" />
             <span className="text-xl text-red-500">Category Theory</span>
+          </div>
+        </Link>
+        <Link href="algo-visual">
+          <div className="bg-white shadow-lg rounded-lg p-6 flex items-center space-x-4 hover:bg-gray-200 transition">
+            <FaShareAlt className="text-red-500 text-2xl" />
+            <span className="text-xl text-red-500">Algorithm Visualizer</span>
           </div>
         </Link>
       </div>
