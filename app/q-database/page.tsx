@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, orderBy, Timestamp } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
-import { Search, Plus, Edit2, Trash2, X } from 'lucide-react'
+import { Search, Plus, Edit2, Trash2, X, ArrowUpDown, Calendar, SortAsc } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 
 interface QdbEntry {
   id: string
@@ -27,10 +28,13 @@ interface EntryFormData {
   tags: string
 }
 
+type SortOption = 'newest' | 'oldest' | 'title' | 'updated'
+
 export default function QDatabasePage() {
   const [entries, setEntries] = useState<QdbEntry[]>([])
   const [filteredEntries, setFilteredEntries] = useState<QdbEntry[]>([])
   const [searchTerm, setSearchTerm] = useState('')
+  const [sortBy, setSortBy] = useState<SortOption>('newest')
   const [isLoading, setIsLoading] = useState(true)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -46,19 +50,55 @@ export default function QDatabasePage() {
     loadEntries()
   }, [])
 
-  // Filter entries based on search term
+  // Keyboard shortcuts
   useEffect(() => {
-    if (!searchTerm.trim()) {
-      setFilteredEntries(entries)
-    } else {
-      const filtered = entries.filter(entry =>
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'k') {
+          e.preventDefault()
+          document.getElementById('search-input')?.focus()
+        } else if (e.key === 'n') {
+          e.preventDefault()
+          setIsCreateDialogOpen(true)
+        }
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
+  // Filter and sort entries based on search term and sort option
+  useEffect(() => {
+    let filtered = entries
+
+    // Apply search filter
+    if (searchTerm.trim()) {
+      filtered = entries.filter(entry =>
         entry.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         entry.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         entry.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
       )
-      setFilteredEntries(filtered)
     }
-  }, [entries, searchTerm])
+
+    // Apply sorting
+    const sorted = [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case 'newest':
+          return b.createdAt.getTime() - a.createdAt.getTime()
+        case 'oldest':
+          return a.createdAt.getTime() - b.createdAt.getTime()
+        case 'title':
+          return a.title.localeCompare(b.title)
+        case 'updated':
+          return b.updatedAt.getTime() - a.updatedAt.getTime()
+        default:
+          return 0
+      }
+    })
+
+    setFilteredEntries(sorted)
+  }, [entries, searchTerm, sortBy])
 
   const loadEntries = async () => {
     try {
@@ -213,19 +253,93 @@ export default function QDatabasePage() {
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
-            placeholder="Search entries by title, description, or tags..."
+            id="search-input"
+            placeholder="Search entries by title, description, or tags... (Ctrl+K)"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
           />
         </div>
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              Add Entry
-            </Button>
-          </DialogTrigger>
+
+        <div className="flex gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="flex items-center gap-2">
+                <ArrowUpDown className="h-4 w-4" />
+                Sort
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setSortBy('newest')}>
+                <Calendar className="mr-2 h-4 w-4" />
+                Newest First
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy('oldest')}>
+                <Calendar className="mr-2 h-4 w-4" />
+                Oldest First
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy('title')}>
+                <SortAsc className="mr-2 h-4 w-4" />
+                Title A-Z
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy('updated')}>
+                <Calendar className="mr-2 h-4 w-4" />
+                Recently Updated
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                Add Entry
+                <span className="text-xs opacity-60 ml-1">(Ctrl+N)</span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>Create New Entry</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Title</label>
+                  <Input
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    placeholder="Enter title..."
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Description</label>
+                  <Textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    placeholder="Enter description..."
+                    rows={4}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Tags</label>
+                  <Input
+                    value={formData.tags}
+                    onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                    placeholder="Enter tags separated by commas..."
+                  />
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={closeDialogs}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleCreateEntry} disabled={!formData.title.trim()}>
+                    Create Entry
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
               <DialogTitle>Create New Entry</DialogTitle>
@@ -359,22 +473,22 @@ export default function QDatabasePage() {
             Try adjusting your search terms
           </p>
         </div>
-      )}
-
-      {/* Entries Grid */}
+      )}      {/* Entries Grid */}
       {!isLoading && filteredEntries.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
           {filteredEntries.map((entry) => (
-            <Card key={entry.id} className="h-full flex flex-col hover:shadow-lg transition-shadow">
-              <CardHeader className="flex-shrink-0">
+            <Card key={entry.id} className="h-full flex flex-col hover:shadow-lg transition-all duration-200 hover:scale-[1.02] group">
+              <CardHeader className="flex-shrink-0 pb-4">
                 <div className="flex justify-between items-start">
-                  <CardTitle className="line-clamp-2">{entry.title}</CardTitle>
-                  <div className="flex gap-1 ml-2">
+                  <CardTitle className="text-lg font-semibold line-clamp-2 group-hover:text-primary transition-colors">
+                    {entry.title}
+                  </CardTitle>
+                  <div className="flex gap-1 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => openEditDialog(entry)}
-                      className="h-8 w-8"
+                      className="h-8 w-8 hover:bg-primary/10"
                     >
                       <Edit2 className="h-4 w-4" />
                     </Button>
@@ -382,32 +496,45 @@ export default function QDatabasePage() {
                       variant="ghost"
                       size="icon"
                       onClick={() => handleDeleteEntry(entry.id)}
-                      className="h-8 w-8 text-destructive hover:text-destructive"
+                      className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="flex-grow flex flex-col">
-                <CardDescription className="flex-grow mb-4 line-clamp-3">
-                  {entry.description || 'No description'}
+              <CardContent className="flex-grow flex flex-col pt-0">
+                <CardDescription className="flex-grow mb-4 line-clamp-4 text-sm leading-relaxed">
+                  {entry.description || (
+                    <span className="italic text-muted-foreground/60">No description</span>
+                  )}
                 </CardDescription>
 
                 {/* Tags */}
                 {entry.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-3">
-                    {entry.tags.map((tag, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
+                  <div className="flex flex-wrap gap-1.5 mb-4">
+                    {entry.tags.slice(0, 4).map((tag, index) => (
+                      <Badge key={index} variant="secondary" className="text-xs px-2 py-0.5">
                         {tag}
                       </Badge>
                     ))}
+                    {entry.tags.length > 4 && (
+                      <Badge variant="outline" className="text-xs px-2 py-0.5">
+                        +{entry.tags.length - 4}
+                      </Badge>
+                    )}
                   </div>
                 )}
 
                 {/* Timestamp */}
-                <div className="text-xs text-muted-foreground">
-                  Updated: {entry.updatedAt.toLocaleDateString()}
+                <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t">
+                  <span>Updated: {entry.updatedAt.toLocaleDateString()}</span>
+                  <span className="text-muted-foreground/60">
+                    {entry.createdAt.toLocaleDateString() !== entry.updatedAt.toLocaleDateString()
+                      ? 'Modified'
+                      : 'Created'
+                    }
+                  </span>
                 </div>
               </CardContent>
             </Card>
