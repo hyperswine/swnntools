@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useState } from "react"
-import { FaTasks, FaCalendarAlt, FaRandom, FaChartBar, FaPalette, FaBook, FaPaintBrush, FaMusic, FaCode, FaCogs, FaBrain, FaProjectDiagram, FaGuitar, FaClipboardList, FaCubes, FaSitemap, FaShareAlt } from "react-icons/fa"
+import { FaTasks, FaCalendarAlt, FaRandom, FaChartBar, FaPalette, FaBook, FaPaintBrush, FaMusic, FaCode, FaCogs, FaBrain, FaProjectDiagram, FaGuitar, FaClipboardList, FaCubes, FaSitemap, FaShareAlt, FaDatabase } from "react-icons/fa"
 
 interface Tool {
   href: string
@@ -35,6 +35,12 @@ const tools: Tool[] = [
     icon: FaChartBar,
     title: "DataView",
     description: "Visualize and analyze your data effectively"
+  },
+  {
+    href: "q-database",
+    icon: FaDatabase,
+    title: "Q-Database",
+    description: "Searchable knowledge base with tags and CRUD operations"
   },
   {
     href: "ui-chooser",

@@ -1,7 +1,7 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
-import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, orderBy, Timestamp } from 'firebase/firestore'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
+import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, orderBy, limit, startAfter, Timestamp, DocumentSnapshot } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { Search, Plus, Edit2, Trash2, X, ArrowUpDown, Calendar, SortAsc } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Loader } from '@/components/ui/loader'
 
 interface QdbEntry {
   id: string
@@ -36,6 +37,9 @@ export default function QDatabasePage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState<SortOption>('newest')
   const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
+  const [lastDoc, setLastDoc] = useState<DocumentSnapshot | null>(null)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [editingEntry, setEditingEntry] = useState<QdbEntry | null>(null)
@@ -45,10 +49,41 @@ export default function QDatabasePage() {
     tags: ''
   })
 
-  // Load entries from Firebase
+  const ENTRIES_PER_PAGE = 20
+  const observerTarget = useRef<HTMLDivElement>(null)
+
+  // Load initial entries from Firebase
   useEffect(() => {
-    loadEntries()
+    loadInitialEntries()
   }, [])
+
+  // Set up intersection observer for infinite scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoadingMore && !searchTerm) {
+          loadMoreEntries()
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current)
+    }
+
+    return () => observer.disconnect()
+  }, [hasMore, isLoadingMore, searchTerm])
+
+  // Reset pagination when sort changes
+  useEffect(() => {
+    if (entries.length > 0) {
+      setEntries([])
+      setLastDoc(null)
+      setHasMore(true)
+      loadInitialEntries()
+    }
+  }, [sortBy])
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -66,44 +101,59 @@ export default function QDatabasePage() {
 
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [])
-
-  // Filter and sort entries based on search term and sort option
+  }, [])  // Filter entries based on search term (client-side filtering for loaded entries)
   useEffect(() => {
-    let filtered = entries
-
-    // Apply search filter
-    if (searchTerm.trim()) {
-      filtered = entries.filter(entry =>
+    if (!searchTerm.trim()) {
+      // When no search term, we use the paginated entries as-is
+      setFilteredEntries(entries)
+    } else {
+      // When searching, filter the loaded entries
+      // Note: This only searches through currently loaded entries
+      const filtered = entries.filter(entry =>
         entry.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         entry.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         entry.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
       )
+      setFilteredEntries(filtered)
     }
+  }, [entries, searchTerm])
 
-    // Apply sorting
-    const sorted = [...filtered].sort((a, b) => {
-      switch (sortBy) {
-        case 'newest':
-          return b.createdAt.getTime() - a.createdAt.getTime()
-        case 'oldest':
-          return a.createdAt.getTime() - b.createdAt.getTime()
-        case 'title':
-          return a.title.localeCompare(b.title)
-        case 'updated':
-          return b.updatedAt.getTime() - a.updatedAt.getTime()
-        default:
-          return 0
-      }
-    })
+  const getOrderByField = () => {
+    switch (sortBy) {
+      case 'newest':
+      case 'oldest':
+        return 'createdAt'
+      case 'updated':
+        return 'updatedAt'
+      case 'title':
+        return 'title'
+      default:
+        return 'updatedAt'
+    }
+  }
 
-    setFilteredEntries(sorted)
-  }, [entries, searchTerm, sortBy])
+  const getOrderDirection = (): 'asc' | 'desc' => {
+    switch (sortBy) {
+      case 'oldest':
+      case 'title':
+        return 'asc'
+      default:
+        return 'desc'
+    }
+  }
 
-  const loadEntries = async () => {
+  const loadInitialEntries = async () => {
     try {
       setIsLoading(true)
-      const q = query(collection(db, 'qdb'), orderBy('updatedAt', 'desc'))
+      const orderField = getOrderByField()
+      const orderDirection = getOrderDirection()
+
+      const q = query(
+        collection(db, 'qdb'),
+        orderBy(orderField, orderDirection),
+        limit(ENTRIES_PER_PAGE)
+      )
+
       const querySnapshot = await getDocs(q)
       const entriesData: QdbEntry[] = []
 
@@ -120,11 +170,58 @@ export default function QDatabasePage() {
       })
 
       setEntries(entriesData)
+      setHasMore(querySnapshot.docs.length === ENTRIES_PER_PAGE)
+      setLastDoc(querySnapshot.docs[querySnapshot.docs.length - 1] || null)
     } catch (error) {
-      console.error('Error loading entries:', error)
+      console.error('Error loading initial entries:', error)
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const loadMoreEntries = async () => {
+    if (!lastDoc || !hasMore || isLoadingMore) return
+
+    try {
+      setIsLoadingMore(true)
+      const orderField = getOrderByField()
+      const orderDirection = getOrderDirection()
+
+      const q = query(
+        collection(db, 'qdb'),
+        orderBy(orderField, orderDirection),
+        startAfter(lastDoc),
+        limit(ENTRIES_PER_PAGE)
+      )
+
+      const querySnapshot = await getDocs(q)
+      const newEntries: QdbEntry[] = []
+
+      querySnapshot.forEach((doc) => {
+        const data = doc.data()
+        newEntries.push({
+          id: doc.id,
+          title: data.title,
+          description: data.description,
+          tags: data.tags || [],
+          createdAt: data.createdAt?.toDate() || new Date(),
+          updatedAt: data.updatedAt?.toDate() || new Date()
+        })
+      })
+
+      setEntries(prev => [...prev, ...newEntries])
+      setHasMore(querySnapshot.docs.length === ENTRIES_PER_PAGE)
+      setLastDoc(querySnapshot.docs[querySnapshot.docs.length - 1] || null)
+    } catch (error) {
+      console.error('Error loading more entries:', error)
+    } finally {
+      setIsLoadingMore(false)
+    }
+  }
+
+  const loadEntries = async () => {
+    // Legacy function for backward compatibility
+    await loadInitialEntries()
   }
 
   const handleCreateEntry = async () => {
@@ -154,7 +251,14 @@ export default function QDatabasePage() {
         updatedAt: now.toDate()
       }
 
-      setEntries([newEntry, ...entries])
+      // Add to the beginning of entries list for newest-first sort
+      if (sortBy === 'newest' || sortBy === 'updated') {
+        setEntries([newEntry, ...entries])
+      } else {
+        // For other sort orders, just refresh the data
+        loadInitialEntries()
+      }
+
       setFormData({ title: '', description: '', tags: '' })
       setIsCreateDialogOpen(false)
     } catch (error) {
@@ -537,6 +641,45 @@ export default function QDatabasePage() {
               </CardContent>
             </Card>
           ))}
+        </div>
+      )}
+
+      {/* Load More Section */}
+      {!searchTerm && hasMore && !isLoading && (
+        <div className="flex justify-center items-center py-8">
+          {isLoadingMore ? (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Loader size="sm" />
+              <span>Loading more entries...</span>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-4">
+              <Button
+                variant="outline"
+                onClick={loadMoreEntries}
+                disabled={isLoadingMore}
+                className="px-6"
+              >
+                Load More Entries
+              </Button>
+              <div className="text-xs text-muted-foreground">
+                Showing {entries.length} entries
+              </div>
+              {/* Hidden scroll target for intersection observer */}
+              <div ref={observerTarget} className="h-1 opacity-0" />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* End of Results Indicator */}
+      {!searchTerm && !hasMore && !isLoading && entries.length > 0 && (
+        <div className="text-center py-8">
+          <div className="inline-flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-4 py-2 rounded-full">
+            <span>•</span>
+            <span>You've reached the end</span>
+            <span>•</span>
+          </div>
         </div>
       )}
     </div>
