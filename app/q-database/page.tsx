@@ -340,46 +340,46 @@ export default function QDatabasePage() {
           </Dialog>
         </div>
       </div>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle>Create New Entry</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Title</label>
-                <Input
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="Enter title..."
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium mb-2 block">Description</label>
-                <Textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Enter description..."
-                  rows={4}
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium mb-2 block">Tags</label>
-                <Input
-                  value={formData.tags}
-                  onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                  placeholder="Enter tags separated by commas..."
-                />
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={closeDialogs}>
-                  Cancel
-                </Button>
-                <Button onClick={handleCreateEntry} disabled={!formData.title.trim()}>
-                  Create Entry
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>Create New Entry</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <label className="text-sm font-medium mb-2 block">Title</label>
+            <Input
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              placeholder="Enter title..."
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium mb-2 block">Description</label>
+            <Textarea
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Enter description..."
+              rows={4}
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium mb-2 block">Tags</label>
+            <Input
+              value={formData.tags}
+              onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+              placeholder="Enter tags separated by commas..."
+            />
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={closeDialogs}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateEntry} disabled={!formData.title.trim()}>
+              Create Entry
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
 
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
