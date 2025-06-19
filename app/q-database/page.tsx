@@ -380,8 +380,6 @@ export default function QDatabasePage() {
               </div>
             </div>
           </DialogContent>
-        </Dialog>
-      </div>
 
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
