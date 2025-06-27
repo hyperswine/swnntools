@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import localFont from "next/font/local"
 import "./globals.css"
+import BackButton from "@/components/BackButton"
 
 // just leave the fonts here for now. Antialiased too
 
@@ -30,6 +31,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <BackButton />
         {children}
       </body>
     </html>
