@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useState } from "react"
-import { FaTasks, FaCalendarAlt, FaRandom, FaChartBar, FaPalette, FaBook, FaPaintBrush, FaMusic, FaCode, FaCogs, FaBrain, FaProjectDiagram, FaGuitar, FaClipboardList, FaCubes, FaSitemap, FaShareAlt, FaDatabase } from "react-icons/fa"
+import { FaTasks, FaCalendarAlt, FaRandom, FaChartBar, FaPalette, FaBook, FaPaintBrush, FaMusic, FaCode, FaCogs, FaBrain, FaProjectDiagram, FaGuitar, FaClipboardList, FaCubes, FaSitemap, FaShareAlt, FaDatabase, FaTint } from "react-icons/fa"
 
 interface Tool {
   href: string
@@ -119,6 +119,12 @@ const tools: Tool[] = [
     icon: FaShareAlt,
     title: "Algorithm Visualizer",
     description: "Convert functional code into interactive flow charts"
+  },
+  {
+    href: "drinkwater-language",
+    icon: FaTint,
+    title: "Drink Water Languages",
+    description: "A cursed compendium of hydration across programming languages"
   }
 ]
 
