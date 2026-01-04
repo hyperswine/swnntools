@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useState } from "react"
-import { FaTasks, FaCalendarAlt, FaRandom, FaChartBar, FaPalette, FaBook, FaPaintBrush, FaMusic, FaCode, FaCogs, FaBrain, FaProjectDiagram, FaGuitar, FaClipboardList, FaCubes, FaSitemap, FaShareAlt, FaDatabase, FaTint } from "react-icons/fa"
+import { FaTasks, FaCalendarAlt, FaRandom, FaChartBar, FaPalette, FaBook, FaPaintBrush, FaMusic, FaCode, FaCogs, FaBrain, FaProjectDiagram, FaGuitar, FaClipboardList, FaCubes, FaSitemap, FaShareAlt, FaDatabase, FaTint, FaMicrochip } from "react-icons/fa"
 
 interface Tool {
   href: string
@@ -125,6 +125,12 @@ const tools: Tool[] = [
     icon: FaTint,
     title: "Drink Water Languages",
     description: "A cursed compendium of hydration across programming languages"
+  },
+  {
+    href: "riscvref",
+    icon: FaMicrochip,
+    title: "RISC-V Reference",
+    description: "Comprehensive reference for RISC-V RV64I, A, and V extensions"
   }
 ]
 
